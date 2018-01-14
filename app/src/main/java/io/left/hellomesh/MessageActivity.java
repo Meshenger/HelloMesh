@@ -1,33 +1,50 @@
 package io.left.hellomesh;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.bassaer.chatmessageview.view.*;
 import com.github.bassaer.chatmessageview.model.Message;
 
 import java.util.Random;
 
+import io.left.rightmesh.android.AndroidMeshManager;
 import io.left.rightmesh.id.MeshID;
+import io.left.rightmesh.mesh.MeshManager;
+import io.left.rightmesh.mesh.MeshStateListener;
+import io.left.rightmesh.util.MeshUtility;
 import io.left.rightmesh.util.RightMeshException;
+import io.reactivex.functions.Consumer;
+
+import static io.left.rightmesh.mesh.MeshManager.DATA_RECEIVED;
 
 
-public class MessageActivity extends Activity {
+public class MessageActivity extends Activity implements MeshStateListener {
     private ChatView mChatView;
+    AndroidMeshManager mm = null;
 
-    MainActivity ma = null;
+    private static final int HELLO_PORT = 9876;
+    private MeshID uuid = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
-        ma = new MainActivity();
+
+        mm = AndroidMeshManager.getInstance(MessageActivity.this, MessageActivity.this);
 
         final String username = this.getIntent().getExtras().getString("title");
-        final MeshID uuid = (MeshID) this.getIntent().getExtras().get("uuid");
+        uuid = (MeshID) this.getIntent().getExtras().get("uuid");
 
         int myId = 0;
         String myName = username;
@@ -74,17 +91,16 @@ public class MessageActivity extends Activity {
                 //Reset edit text
                 mChatView.setInputText("");
 
-//                try {
-//                    ma.sendOne(view, message.toString(), uuid);
-//                } catch (RightMeshException e) {
-//                    e.getStackTrace();
-//                }
+                try {
+                    sendOne(view, message.getMessageText(), uuid);
+                } catch (RightMeshException e) {
+                    e.printStackTrace();
+                }
 
                 //Receive message
                 final Message receivedMessage = new Message.Builder()
                         .setUser(you)
                         .setRightMessage(false)
-                        .setMessageText("HI")
                         .build();
 
                 // This is a demo bot
@@ -100,6 +116,63 @@ public class MessageActivity extends Activity {
         });
 
         setTitle(username);
+
+    }
+
+    public void sendOne(View v, String message, MeshID recpMshId) throws RightMeshException {
+        String msg = "Hello to: " + recpMshId + "\n Message: " + message + "\nfrom " + uuid;
+        MeshUtility.Log(this.getClass().getCanonicalName(), "MSG: " + msg);
+        byte[] testData = msg.getBytes();
+        mm.sendDataReliable(recpMshId, HELLO_PORT, testData);
+    }
+
+
+    private void handleDataReceived(MeshManager.RightMeshEvent e) {
+        final MeshManager.DataReceivedEvent event = (MeshManager.DataReceivedEvent) e;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Toast data contents.
+                String message = new String(event.data);
+                Toast.makeText(MessageActivity.this, message, Toast.LENGTH_SHORT).show();
+
+                // Play a notification.
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Ringtone r = RingtoneManager.getRingtone(MessageActivity.this, notification);
+                r.play();
+            }
+        });
+    }
+
+    @Override
+    public void meshStateChanged(MeshID meshID, int state) {
+        if (state == MeshStateListener.SUCCESS) {
+            try {
+                // Binds this app to MESH_PORT.
+                // This app will now receive all events generated on that port.
+                mm.bind(HELLO_PORT);
+
+                // Subscribes handlers to receive events from the mesh.
+                mm.on(DATA_RECEIVED, new Consumer() {
+                    @Override
+                    public void accept(Object o) throws Exception {
+                        handleDataReceived((MeshManager.RightMeshEvent) o);
+                    }
+                });
+            } catch (RightMeshException e) {
+                String status = "Error initializing the library" + e.toString();
+                Toast.makeText(getApplicationContext(), status, Toast.LENGTH_SHORT).show();
+                TextView txtStatus = (TextView) findViewById(R.id.txtStatus);
+                txtStatus.setText(status);
+                return;
+            }
+        }
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
 
     }
 }
