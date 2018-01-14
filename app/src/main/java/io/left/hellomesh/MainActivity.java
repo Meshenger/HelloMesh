@@ -15,6 +15,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.bassaer.chatmessageview.model.Message;
+import com.github.bassaer.chatmessageview.view.ChatView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +49,6 @@ public class MainActivity extends Activity implements MeshStateListener {
     private ListView mListView;
     private ArrayList<String> recipeList;
     private ArrayList<MeshID> meshIDArrayList;
-
 
     /**
      * Called when app first opens, initializes {@link AndroidMeshManager} reference (which will
@@ -222,6 +224,21 @@ public class MainActivity extends Activity implements MeshStateListener {
                 // Toast data contents.
                 String message = new String(event.data);
                 Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+
+                if (DataHolder.getInstance().getData() != null) {
+                    ChatView cv = DataHolder.getInstance().getData();
+
+                    final Message receivedMessage = new Message.Builder()
+                            .setUser(new User(1, hashUuid(event.peerUuid)))
+                            .setRightMessage(false)
+                            .setMessageText(message.substring(30, message.length()-15))
+                            .build();
+
+                    cv.receive(receivedMessage);
+                }
+
+
+
 
                 // Play a notification.
                 Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

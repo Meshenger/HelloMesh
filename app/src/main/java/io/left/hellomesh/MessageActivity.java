@@ -37,6 +37,9 @@ public class MessageActivity extends Activity implements MeshStateListener {
     private String myName = null;
     private String receivedMessageText = null;
     private User you;
+    String data;
+
+    DataHolder dh;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -125,6 +128,8 @@ public class MessageActivity extends Activity implements MeshStateListener {
 
         mChatView = (ChatView)findViewById(R.id.chat_view);
 
+        DataHolder.getInstance().setData(mChatView);
+//        DataHolder.getInstance().setUserData(you);
         //Set UI parameters if you need
         mChatView.setAutoScroll(true);
         mChatView.setRightBubbleColor(ContextCompat.getColor(this, R.color.green500));
