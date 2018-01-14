@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements MeshStateListener {
                     recipeList.add(i.toString());
                 }
                 // 1
-                String username = recipeList.get(position);
+                String yourName = recipeList.get(position);
 
                 // 2
                 Intent detailIntent = new Intent(context, MessageActivity.class);
@@ -87,11 +87,12 @@ public class MainActivity extends Activity implements MeshStateListener {
                     meshIDArrayList.add(i);
                 }
 
-                MeshID meshID = meshIDArrayList.get(position);
+                MeshID yourMeshID = meshIDArrayList.get(position);
 
                 // 3
-                detailIntent.putExtra("title", username);
-                detailIntent.putExtra("uuid", meshID);
+                detailIntent.putExtra("title", yourName);
+                detailIntent.putExtra("uuid", yourMeshID);
+                detailIntent.putExtra("myName", hashUuid(mm.getUuid()));
 
                 // 4
                 startActivity(detailIntent);
