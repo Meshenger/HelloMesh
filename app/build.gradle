@@ -43,7 +43,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "io.left.hellomesh"
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -61,9 +61,11 @@ android {
 }
 
 dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.2'
-    compile ('io.left.rightmesh:rightmesh-library:0.4.0')
-    compile 'com.android.support:appcompat-v7:27.0.0'
+    compile('io.left.rightmesh:rightmesh-library:0.4.0')
+//    compile 'com.android.support:appcompat-v7:27.0.0'
+    compile 'com.github.bassaer:chatmessageview:1.8.6'
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
