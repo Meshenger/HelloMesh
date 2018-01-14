@@ -1,11 +1,14 @@
 package io.left.hellomesh;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -41,6 +44,8 @@ public class MainActivity extends Activity implements MeshStateListener {
     HashMap<MeshID, String> usernames = new HashMap<MeshID, String>();
 
     private ListView mListView;
+    private ArrayList<String> recipeList;
+    private ArrayList<MeshID> meshIDArrayList;
 
 
     /**
@@ -59,6 +64,40 @@ public class MainActivity extends Activity implements MeshStateListener {
         // list view
 
         mListView = (ListView) findViewById(R.id.recipe_list_view);
+
+        final Context context = this;
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object[] values = usernames.values().toArray();
+                recipeList = new ArrayList<String>();
+                for (Object i: values) {
+                    recipeList.add(i.toString());
+                }
+                // 1
+                String username = recipeList.get(position);
+
+                // 2
+                Intent detailIntent = new Intent(context, MessageActivity.class);
+
+                // meshID:
+                meshIDArrayList = new ArrayList<MeshID>();
+                for (MeshID i: usernames.keySet()) {
+                    meshIDArrayList.add(i);
+                }
+
+                MeshID meshID = meshIDArrayList.get(position);
+
+                // 3
+                detailIntent.putExtra("title", username);
+                detailIntent.putExtra("uuid", meshID);
+
+                // 4
+                startActivity(detailIntent);
+            }
+
+        });
     }
 
     /**
@@ -152,7 +191,7 @@ public class MainActivity extends Activity implements MeshStateListener {
 
         Object[] values = usernames.values().toArray();
 
-        final ArrayList<String> recipeList = new ArrayList<String>();
+        recipeList = new ArrayList<String>();
         for (Object i: values) {
             recipeList.add(i.toString());
         }
@@ -247,12 +286,11 @@ public class MainActivity extends Activity implements MeshStateListener {
 
     //
 
-//    public void sendOne(View v, String message, MeshID recpMshId) throws RightMeshException {
-//        String username = hashUuid(recpMshId);
-//        MeshUtility.Log(this.getClass().getCanonicalName(), "MSG: " + msg);
-//        byte[] testData = message.getBytes();
-//        mm.sendDataReliable(re, HELLO_PORT, testData);
-//    }
+    public void sendOne(View v, String message, MeshID recpMshId) throws RightMeshException {
+        MeshUtility.Log(this.getClass().getCanonicalName(), "MSG: " + message);
+        byte[] testData = message.getBytes();
+        mm.sendDataReliable(recpMshId, HELLO_PORT, testData);
+    }
 
     /**
      * Open mesh settings screen.
