@@ -2,9 +2,9 @@ apply plugin: 'com.android.application'
 
 buildscript {
     ext {
-        artifactory_app_username = "tommylau"
-        artifactory_app_password = "8e76c00c655d9c2b68692359fb417c65"
-        artifactory_app_key = "0x07445a07ca7c68b09a27346394494ab78f79e002"
+        artifactory_app_username = "cerealdealer"
+        artifactory_app_password = "64b7f7b4aa1a03af04727c5821271a3a"
+        artifactory_app_key = "0x06a2d1f58e99380a9d94181c3b653a30f546e1ee"
     }
     repositories {
         maven {
